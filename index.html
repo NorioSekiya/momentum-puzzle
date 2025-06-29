@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>運動量保存則パズル</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        .timer {
+            font-size: 2em;
+            background-color: #f0f8ff;
+            border: 2px solid #00f;
+            border-radius: 10px;
+            padding: 10px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .hint {
+            display: none;
+            margin-top: 10px;
+            font-size: 1em;
+            color: #555;
+        }
+        .equation-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .equation-row {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .equation-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        select {
+            margin: 0 5px;
+            font-size: 1em;
+        }
+        .equals {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-size: 2em;
+            margin: 10px 0;
+        }
+        .correct {
+            animation: flash 1s ease;
+        }
+        @keyframes flash {
+            0% { background-color: #cfc; }
+            50% { background-color: #6f6; }
+            100% { background-color: #cfc; }
+        }
+        button {
+            font-size: 1em;
+            padding: 10px 20px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>問題：物体1(質量 m₁)、物体2(質量 m₂) の衝突前の速度v₁、v₂、衝突後の速度v₁’、v₂’を用いて、運動量保存則の式を作りなさい。</h2>
+    <div class="timer" id="timer">30</div>
+    <button onclick="showHint()">ヒント</button>
+    <div class="hint" id="hint">ヒント：衝突前の運動量の合計 = 衝突後の運動量の合計</div>
+
+    <div class="equation-container">
+        <div class="equation-row" id="left-side">
+            <span class="equation-label">衝突前:</span>
+            <select id="left1"><option>選択</option><option>m₁</option><option>m₂</option><option>v₁</option><option>v₂</option><option>+</option><option>ｰ</option></select>
+            <select id="left2"><option>選択</option><option>m₁</option><option>m₂</option><option>v₁</option><option>v₂</option><option>+</option><option>ｰ</option></select>
+            <select id="left3"><option>選択</option><option>m₁</option><option>m₂</option><option>v₁</option><option>v₂</option><option>+</option><option>ｰ</option></select>
+            <select id="left4"><option>選択</option><option>m₁</option><option>m₂</option><option>v₁</option><option>v₂</option><option>+</option><option>ｰ</option></select>
+            <select id="left5"><option>選択</option><option>m₁</option><option>m₂</option><option>v₁</option><option>v₂</option><option>+</option><option>ｰ</option></select>
+        </div>
+        <div class="equals">＝</div>
+        <div class="equation-row" id="right-side">
+            <span class="equation-label">衝突後:</span>
+            <select id="right1"><option>選択</option><option>m₁</option><option>m₂</option><option>v₁’</option><option>v₂’</option><option>+</option><option>ｰ</option></select>
+            <select id="right2"><option>選択</option><option>m₁</option><option>m₂</option><option>v₁’</option><option>v₂’</option><option>+</option><option>ｰ</option></select>
+            <select id="right3"><option>選択</option><option>m₁</option><option>m₂</option><option>v₁’</option><option>v₂’</option><option>+</option><option>ｰ</option></select>
+            <select id="right4"><option>選択</option><option>m₁</option><option>m₂</option><option>v₁’</option><option>v₂’</option><option>+</option><option>ｰ</option></select>
+            <select id="right5"><option>選択</option><option>m₁</option><option>m₂</option><option>v₁’</option><option>v₂’</option><option>+</option><option>ｰ</option></select>
+        </div>
+    </div>
+
+    <button onclick="checkAnswer()">答え合わせ</button>
+
+    <script>
+        let timeLeft = 30;
+        let timerInterval = setInterval(() => {
+            document.getElementById("timer").textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("時間切れです！");
+            }
+            timeLeft--;
+        }, 1000);
+
+        function showHint() {
+            document.getElementById("hint").style.display = "block";
+        }
+
+        function getSelectedValues(prefix) {
+            let values = [];
+            for (let i = 1; i <= 5; i++) {
+                let val = document.getElementById(prefix + i).value;
+                if (val !== "選択") values.push(val);
+            }
+            return values;
+        }
+
+        function checkAnswer() {
+            const left = getSelectedValues("left");
+            const right = getSelectedValues("right");
+
+            const validLeft = [["m₁", "v₁"], ["m₂", "v₂"]];
+            const validRight = [["m₁", "v₁’"], ["m₂", "v₂’"]];
+
+            function containsValidTerms(terms, validPairs) {
+                let found = validPairs.map(() => false);
+                for (let i = 0; i < terms.length - 1; i++) {
+                    for (let j = 0; j < validPairs.length; j++) {
+                        if (!found[j] && ((terms[i] === validPairs[j][0] && terms[i+1] === validPairs[j][1]) ||
+                                          (terms[i] === validPairs[j][1] && terms[i+1] === validPairs[j][0]))) {
+                            found[j] = true;
+                        }
+                    }
+                }
+                return found.every(f => f);
+            }
+
+            if (containsValidTerms(left, validLeft) && containsValidTerms(right, validRight)) {
+                document.getElementById("left-side").classList.add("correct");
+                document.getElementById("right-side").classList.add("correct");
+                clearInterval(timerInterval);
+                alert("正解です！");
+            } else {
+                alert("不正解です。もう一度試してください。");
+            }
+        }
+    </script>
+</body>
+</html>
