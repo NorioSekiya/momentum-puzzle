@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>運動量保存則パズル</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .hidden {
+      display: none;
+    }
+    .timer {
+      font-size: 24px;
+      border: 2px solid #333;
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background-color: #f0f0f0;
+      margin: 10px;
+    }
+    select {
+      font-size: 18px;
+      padding: 5px;
+      margin: 5px;
+      min-width: 60px;
+    }
+    .equation-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0;
+    }
+    .equation-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 5px;
+    }
+    .equal-sign {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 24px;
+      margin: 10px 0;
+    }
+    #result {
+      font-size: 24px;
+      color: green;
+      margin-top: 20px;
+    }
+    #hintText {
+      margin-top: 10px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div id="startScreen">
+    <h2>問題：</h2>
+    <p>物体1(質量 m₁)、物体2(質量 m₂) の衝突前の速度v₁、v₂、衝突後の速度v₁’、v₂’を用いて、運動量保存則の式を作りなさい。</p>
+    <button onclick="startPuzzle()">スタート</button>
+  </div>
+
+  <div id="puzzleScreen" class="hidden">
+    <div class="timer" id="timer">30</div>
+    <button onclick="showHint()">ヒント</button>
+    <div id="hintText" class="hidden">衝突前の運動量の合計 = 衝突後の運動量の合計</div>
+
+    <div class="equation-block">
+      <div>衝突前</div>
+      <div class="equation-row" id="lhs">
+        <select></select><select></select><select></select><select></select><select></select>
+      </div>
+      <div class="equal-sign">＝</div>
+      <div>衝突後</div>
+      <div class="equation-row" id="rhs">
+        <select></select><select></select><select></select><select></select><select></select>
+      </div>
+    </div>
+
+    <button onclick="checkAnswer()">答え合わせ</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const options = ["m₁", "m₂", "v₁", "v₂", "v₁’", "v₂’", "+", "ｰ"];
+    const lhsSelects = document.querySelectorAll("#lhs select");
+    const rhsSelects = document.querySelectorAll("#rhs select");
+    const timerDisplay = document.getElementById("timer");
+    const resultDisplay = document.getElementById("result");
+    const hintText = document.getElementById("hintText");
+    let timer;
+    let timeLeft = 30;
+
+    function populateSelects() {
+      [...lhsSelects, ...rhsSelects].forEach(select => {
+        options.forEach(opt => {
+          const option = document.createElement("option");
+          option.value = opt;
+          option.textContent = opt;
+          select.appendChild(option);
+        });
+      });
+    }
+
+    function startPuzzle() {
+      document.getElementById("startScreen").classList.add("hidden");
+      document.getElementById("puzzleScreen").classList.remove("hidden");
+      populateSelects();
+      startTimer();
+    }
+
+    function startTimer() {
+      timer = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          alert("時間切れです！");
+        }
+      }, 1000);
+    }
+
+    function showHint() {
+      hintText.classList.remove("hidden");
+    }
+
+    function checkAnswer() {
+      const lhs = Array.from(lhsSelects).map(s => s.value).join("");
+      const rhs = Array.from(rhsSelects).map(s => s.value).join("");
+
+      const validLHS = ["m₁v₁+m₂v₂", "m₂v₂+m₁v₁"];
+      const validRHS = ["m₁v₁’+m₂v₂’", "m₂v₂’+m₁v₁’"];
+
+      if (validLHS.includes(lhs) && validRHS.includes(rhs)) {
+        clearInterval(timer);
+        resultDisplay.textContent = "正解です！";
+        document.body.style.backgroundColor = "#c8f7c5";
+        setTimeout(() => {
+          document.body.style.backgroundColor = "white";
+        }, 1000);
+      } else {
+        resultDisplay.textContent = "もう一度試してください。";
+      }
+    }
+  </script>
+</body>
+</html>
