@@ -1,0 +1,147 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>運動量保存則パズル</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #f0f0f0;
+    }
+    h1 {
+      text-align: center;
+      margin: 1em 0;
+    }
+    #timer {
+      font-size: 1.5em;
+      margin: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      background: green;
+      color: white;
+      transition: background 0.5s ease;
+    }
+    #slots, #pieces {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 10px;
+    }
+    .slot, .piece {
+      width: 60px;
+      height: 60px;
+      margin: 5px;
+      font-size: 1.2em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed #ccc;
+      background: white;
+      touch-action: none;
+    }
+    .piece {
+      border: 2px solid #333;
+      cursor: grab;
+    }
+    #result {
+      margin: 10px;
+      font-size: 1.2em;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      margin: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .slot, .piece {
+        width: 50px;
+        height: 50px;
+        font-size: 1em;
+      }
+      #timer {
+        font-size: 1.2em;
+      }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <h1>運動量保存則パズル</h1>
+  <div id="timer">30</div>
+  <div id="slots"></div>
+  <div id="pieces"></div>
+  <button id="checkBtn">Check Answer</button>
+  <div id="result"></div>
+
+  <script>
+    const correctOrder = ["m₁", "v₁", "+", "m₂", "v₂", "=", "m₁", "v₁'", "+", "m₂", "v₂'"];
+    const slots = document.getElementById("slots");
+    const pieces = document.getElementById("pieces");
+    const result = document.getElementById("result");
+    const checkBtn = document.getElementById("checkBtn");
+    const timerDisplay = document.getElementById("timer");
+
+    correctOrder.forEach(() => {
+      const slot = document.createElement("div");
+      slot.className = "slot";
+      slot.ondragover = e => e.preventDefault();
+      slot.ondrop = e => {
+        const id = e.dataTransfer.getData("text");
+        const piece = document.getElementById(id);
+        if (piece) e.target.appendChild(piece);
+      };
+      slots.appendChild(slot);
+    });
+
+    const shuffled = [...correctOrder].sort(() => Math.random() - 0.5);
+    shuffled.forEach((text, i) => {
+      const piece = document.createElement("div");
+      piece.className = "piece";
+      piece.textContent = text;
+      piece.id = "piece" + i;
+      piece.draggable = true;
+      piece.ondragstart = e => e.dataTransfer.setData("text", e.target.id);
+      pieces.appendChild(piece);
+    });
+
+    checkBtn.onclick = () => {
+      const userAnswer = Array.from(slots.children).map(slot => slot.firstChild?.textContent || "");
+      if (userAnswer.join() === correctOrder.join()) {
+        result.textContent = "✅ 正解です！";
+      } else {
+        result.textContent = "❌ 間違っています。";
+      }
+    };
+
+    let timeLeft = 30;
+    const timer = setInterval(() => {
+      timeLeft--;
+      timerDisplay.textContent = timeLeft;
+      if (timeLeft <= 10) {
+        timerDisplay.style.background = "red";
+        timerDisplay.style.animation = "pulse 1s infinite";
+      } else if (timeLeft <= 20) {
+        timerDisplay.style.background = "orange";
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        timerDisplay.textContent = "時間切れです！";
+        checkBtn.disabled = true;
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
